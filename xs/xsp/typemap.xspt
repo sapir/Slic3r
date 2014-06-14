@@ -123,6 +123,7 @@
 %typemap{TriangleMeshPtrs};
 %typemap{Ref<SurfaceCollection>}{simple};
 %typemap{Extruder*};
+%typemap{Ref<Extruder>}{simple};
 %typemap{Model*};
 %typemap{Ref<Model>}{simple};
 %typemap{Clone<Model>}{simple};

@@ -5,7 +5,187 @@
 #include "GCode.hpp"
 %}
 
+
+%name{Slic3r::GCode::MotionPlanner} class GCodeMotionPlanner {
+};
+
+
 %name{Slic3r::GCode} class GCode {
-    GCode();
+    GCode(PlaceholderParser *placeholder_parser, int layer_count);
     ~GCode();
+
+    std::string change_layer(Layer *layer);
+    std::string move_z(coordf_t z, std::string comment);
+    std::string set_acceleration(int acceleration);
+    std::string retract(coordf_t move_z=0, bool toolchange=false);
+
+    // workaround for method overloading
+
+    %name{_G0_G1_} std::string _G0_G1(bool is_G0,
+        coordf_t e, coordf_t F, std::string comment);
+
+    %name{_G0_G1_p} std::string _G0_G1(bool is_G0, Pointf *point,
+        coordf_t e, coordf_t F, std::string comment)
+        %code%{ RETVAL = THIS->_G0_G1(is_G0, *point, e, F, comment); %};
+
+    %name{_G0_G1_z} std::string _G0_G1(bool is_G0, coordf_t z,
+        coordf_t e, coordf_t F, std::string comment);
+
+    %name{_G0_G1_pz} std::string _G0_G1(bool is_G0, Pointf *point, coordf_t z,
+        coordf_t e, coordf_t F, std::string comment)
+        %code%{ RETVAL = THIS->_G0_G1(is_G0, *point, z, e, F, comment); %};
+
+    Ref<FullPrintConfig> config()
+        %code%{ RETVAL = &THIS->config; %};
+    Ref<PlaceholderParser> placeholder_parser()
+        %code%{ RETVAL = THIS->placeholder_parser; %};
+
+    // Ref<Points> standby_points;
+
+    Ref<Layer> layer()
+        %code%{ RETVAL = THIS->layer; %};
+    Ref<ExPolygonCollection> _layer_islands()
+        %code%{ RETVAL = &THIS->_layer_islands; %};
+    Ref<ExPolygonCollection> _upper_layer_islands()
+        %code%{ RETVAL = &THIS->_upper_layer_islands; %};
+    coordf_t z()
+        %code%{
+            if (!THIS->z_defined) {
+                XSRETURN_UNDEF;
+            }
+
+            RETVAL = THIS->z;
+        %};
+
+    //std::map<PrintObject*, Point> _seam_position; // TODO: object? point?
+    // std::map<int, Extruder*> extruders;
+    // Ref<GCodeMotionPlanner> external_mp;
+    // Ref<GCodeMotionPlanner> layer_mp;
+    // Ref<Point> last_pos;
+    // Ref<Polyline> wipe_path;
+
+%{
+bool
+GCode::enable_loop_clipping(...)
+    CODE:
+        if (items > 1) {
+            THIS->enable_loop_clipping = (bool)SvIV(ST(1));
+        }
+        RETVAL = THIS->enable_loop_clipping;
+    OUTPUT:
+        RETVAL
+
+bool
+GCode::enable_wipe(...)
+    CODE:
+        if (items > 1) {
+            THIS->enable_wipe = (bool)SvIV(ST(1));
+        }
+        RETVAL = THIS->enable_wipe;
+    OUTPUT:
+        RETVAL
+
+int
+GCode::layer_count(...)
+    CODE:
+        if (items > 1) {
+            THIS->layer_count = (int)SvIV(ST(1));
+        }
+        RETVAL = THIS->layer_count;
+    OUTPUT:
+        RETVAL
+
+coordf_t
+GCode::shift_x(...)
+    CODE:
+        if (items > 1) {
+            THIS->shift_x = (coordf_t)SvNV(ST(1));
+        }
+        RETVAL = THIS->shift_x;
+    OUTPUT:
+        RETVAL
+
+coordf_t
+GCode::shift_y(...)
+    CODE:
+        if (items > 1) {
+            THIS->shift_y = (coordf_t)SvNV(ST(1));
+        }
+        RETVAL = THIS->shift_y;
+    OUTPUT:
+        RETVAL
+
+bool
+GCode::multiple_extruders(...)
+    CODE:
+        if (items > 1) {
+            THIS->multiple_extruders = (bool)SvIV(ST(1));
+        }
+        RETVAL = THIS->multiple_extruders;
+    OUTPUT:
+        RETVAL
+
+Ref<Extruder>
+GCode::extruder(...)
+    CODE:
+        if (items > 1) {
+        // TODO:
+            //THIS->extruder = (int)SvIV(ST(1));
+        }
+        RETVAL = THIS->extruder;
+    OUTPUT:
+        RETVAL
+
+bool
+GCode::new_object(...)
+    CODE:
+        if (items > 1) {
+            THIS->new_object = (bool)SvIV(ST(1));
+        }
+        RETVAL = THIS->new_object;
+    OUTPUT:
+        RETVAL
+
+bool
+GCode::straight_once(...)
+    CODE:
+        if (items > 1) {
+            THIS->straight_once = (bool)SvIV(ST(1));
+        }
+        RETVAL = THIS->straight_once;
+    OUTPUT:
+        RETVAL
+
+double
+GCode::elapsed_time(...)
+    CODE:
+        if (items > 1) {
+            THIS->elapsed_time = (double)SvNV(ST(1));
+        }
+        RETVAL = THIS->elapsed_time;
+    OUTPUT:
+        RETVAL
+
+double
+GCode::lifted(...)
+    CODE:
+        if (items > 1) {
+            THIS->lifted = (double)SvNV(ST(1));
+        }
+        RETVAL = THIS->lifted;
+    OUTPUT:
+        RETVAL
+
+double
+GCode::last_fan_speed(...)
+    CODE:
+        if (items > 1) {
+            THIS->last_fan_speed = (double)SvNV(ST(1));
+        }
+        RETVAL = THIS->last_fan_speed;
+    OUTPUT:
+        RETVAL
+
+%}
+
 };

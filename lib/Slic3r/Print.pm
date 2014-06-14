@@ -799,10 +799,7 @@ sub write_gcode {
     }
     
     # set up our helper object
-    my $gcodegen = Slic3r::GCode->new(
-        placeholder_parser  => $self->placeholder_parser,
-        layer_count         => $layer_count,
-    );
+    my $gcodegen = Slic3r::GCode->new($self->placeholder_parser, $layer_count);
     $gcodegen->config->apply_print_config($self->config);
     $gcodegen->set_extruders($self->extruders, $self->config);
     
