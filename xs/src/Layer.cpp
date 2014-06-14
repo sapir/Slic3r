@@ -108,6 +108,11 @@ Layer::delete_region(int idx)
     delete item;
 }
 
+ExPolygonCollection
+Layer::islands()
+{
+    return this->slices;
+}
 
 #ifdef SLIC3RXS
 REGISTER_CLASS(Layer, "Layer");
@@ -122,6 +127,17 @@ SupportLayer::SupportLayer(int id, PrintObject *object, coordf_t height,
 
 SupportLayer::~SupportLayer()
 {
+}
+
+ExPolygonCollection
+SupportLayer::islands()
+{
+    ExPolygonCollection ret = this->slices;
+    ret.expolygons.insert(
+        ret.expolygons.end(),
+        this->support_islands.expolygons.begin(),
+        this->support_islands.expolygons.end());
+    return ret;
 }
 
 #ifdef SLIC3RXS

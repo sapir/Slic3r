@@ -85,6 +85,10 @@ class Layer {
     LayerRegion* get_region(int idx);
     LayerRegion* add_region(PrintRegion* print_region);
 
+    // the purpose of this method is to be overridden for ::Support layers
+    virtual ExPolygonCollection islands();
+
+
     protected:
     int _id;     // sequential number of layer, 0-based
     PrintObject *_object;
@@ -103,6 +107,9 @@ class SupportLayer : public Layer {
     friend class PrintObject;
 
     public:
+    virtual ExPolygonCollection islands();
+
+
     ExPolygonCollection support_islands;
     ExtrusionEntityCollection support_fills;
     ExtrusionEntityCollection support_interface_fills;

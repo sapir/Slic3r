@@ -17,12 +17,6 @@ sub config {
     return $self->object->config;
 }
 
-# the purpose of this method is to be overridden for ::Support layers
-sub islands {
-    my $self = shift;
-    return $self->slices;
-}
-
 sub region {
     my $self = shift;
     my ($region_id) = @_;
@@ -133,13 +127,9 @@ sub make_perimeters {
     }
 }
 
+
 package Slic3r::Layer::Support;
 
 our @ISA = qw(Slic3r::Layer);
-
-sub islands {
-    my $self = shift;
-    return [ @{$self->slices}, @{$self->support_islands} ];
-}
 
 1;
