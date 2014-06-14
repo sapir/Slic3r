@@ -1,0 +1,11 @@
+%module{Slic3r::XS};
+
+%{
+#include <myinit.h>
+#include "GCode.hpp"
+%}
+
+%name{Slic3r::GCode} class GCode {
+    GCode();
+    ~GCode();
+};
