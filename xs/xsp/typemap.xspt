@@ -104,6 +104,11 @@
 %typemap{Ref<PlaceholderParser>}{simple};
 %typemap{Clone<PlaceholderParser>}{simple};
 
+%typemap{GCode*};
+
+%typemap{GCodeMotionPlanner*};
+%typemap{Ref<GCodeMotionPlanner>}{simple};
+
 
 %typemap{Points};
 %typemap{Pointfs};
