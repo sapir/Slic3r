@@ -63,6 +63,14 @@
 
     Ref<Extruder> get_extruder(int id)
         %code%{ RETVAL = THIS->extruders.at(id); %};
+    std::vector<int> extruder_ids()
+        %code%{
+            for (std::map<int, Extruder*>::iterator i = THIS->extruders.begin();
+                i != THIS->extruders.end(); ++i)
+            {
+                RETVAL.push_back(i->first);
+            }
+        %};
 
     Ref<Extruder> extruder()
         %code%{ RETVAL = THIS->extruder; %};

@@ -5,7 +5,7 @@ use List::Util qw(first);
 use Slic3r::Geometry qw(X Y unscale);
 
 has 'print'                         => (is => 'ro', required => 1);
-has 'gcodegen'                      => (is => 'ro', required => 1, handles => [qw(extruders)]);
+has 'gcodegen'                      => (is => 'ro', required => 1);
 has 'shift'                         => (is => 'ro', default => sub { [0,0] });
 
 has 'spiralvase'                    => (is => 'lazy');
@@ -63,8 +63,8 @@ sub process_layer {
     $self->gcodegen->enable_loop_clipping(!defined $self->spiralvase || !$self->spiralvase->enable);
     
     if (!$self->second_layer_things_done && $layer->id == 1) {
-        for my $extruder_id (sort keys %{$self->extruders}) {
-            my $extruder = $self->extruders->{$extruder_id};
+        for my $extruder_id (sort $self->gcodegen->extruder_ids) {
+            my $extruder = $self->gcodegen->get_extruder($extruder_id);
             $gcode .= $self->gcodegen->set_temperature($extruder->temperature, 0, $extruder->id)
                 if $extruder->temperature && $extruder->temperature != $extruder->first_layer_temperature;
         }
@@ -83,7 +83,7 @@ sub process_layer {
     if (((values %{$self->skirt_done}) < $self->print->config->skirt_height || $self->print->config->skirt_height == -1)
         && !$self->skirt_done->{$layer->print_z}) {
         $self->gcodegen->set_shift(@{$self->shift});
-        my @extruder_ids = sort keys %{$self->extruders};
+        my @extruder_ids = sort $self->gcodegen->extruder_ids;
         $gcode .= $self->gcodegen->set_extruder($extruder_ids[0]);
         # skip skirt if we have a large brim
         if ($layer->id < $self->print->config->skirt_height || $self->print->config->skirt_height == -1) {
