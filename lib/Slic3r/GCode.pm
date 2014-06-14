@@ -125,7 +125,7 @@ sub extrude_loop {
     
     # extrude along the path
     my $gcode = join '', map $self->extrude_path($_, $description, $speed), @paths;
-    $self->wipe_path($paths[-1]->polyline->clone) if $self->enable_wipe;  # TODO: don't limit wipe to last path
+    $self->set_wipe_path($paths[-1]->polyline->clone) if $self->enable_wipe;  # TODO: don't limit wipe to last path
     
     # make a little move inwards before leaving loop
     if ($paths[-1]->role == EXTR_ROLE_EXTERNAL_PERIMETER && defined $self->layer && $self->config->perimeters > 1) {
@@ -221,7 +221,7 @@ sub extrude_path {
             $self->config->gcode_comments ? " ; $description" : "");
 
         if ($self->enable_wipe) {
-            $self->wipe_path($path->polyline->clone);
+            $self->set_wipe_path($path->polyline->clone);
             $self->wipe_path->reverse;
         }
     }

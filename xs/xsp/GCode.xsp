@@ -67,7 +67,11 @@
     // Ref<GCodeMotionPlanner> external_mp;
     // Ref<GCodeMotionPlanner> layer_mp;
     // Ref<Point> last_pos;
-    // Ref<Polyline> wipe_path;
+
+    Ref<Polyline> wipe_path()
+        %code%{ RETVAL = &THIS->wipe_path; %};
+    void set_wipe_path(Polyline *wipe_path)
+        %code%{ THIS->wipe_path = *wipe_path; %};
 
 %{
 bool
