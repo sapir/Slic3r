@@ -17,7 +17,7 @@
     void set_extruders(std::vector<int> extruder_ids, PrintConfig *print_config);
 
     std::string change_layer(Layer *layer);
-    std::string move_z(coordf_t z, std::string comment);
+    std::string move_z(coordf_t to_z, std::string comment);
     std::string set_acceleration(int acceleration);
     std::string retract(coordf_t move_z=0, bool toolchange=false);
 
