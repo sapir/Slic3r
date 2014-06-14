@@ -131,7 +131,7 @@ GCode::clear_extruders()
 }
 
 void
-GCode::out_pointf(std::stringstream &gcode_stm, const Pointf &point)
+GCode::out_point(std::stringstream &gcode_stm, const Point &point)
 {
     gcode_stm
         << " X" << (point.x * SCALING_FACTOR) + this->shift_x - this->extruder->extruder_offset().x
@@ -156,9 +156,9 @@ GCode::do_Gx_gcode(std::stringstream &gcode_stm, bool is_G0)
 }
 
 void
-GCode::do_Gx_point(std::stringstream &gcode_stm, const Pointf &point)
+GCode::do_Gx_point(std::stringstream &gcode_stm, const Point &point)
 {
-    out_pointf(gcode_stm, point);
+    out_point(gcode_stm, point);
     this->last_pos = point;
 }
 
@@ -203,7 +203,7 @@ GCode::_G0_G1(bool use_G0,
 }
 
 std::string
-GCode::_G0_G1(bool use_G0, Pointf point,
+GCode::_G0_G1(bool use_G0, const Point &point,
     coordf_t e, coordf_t F, const std::string &comment)
 {
     std::stringstream gcode_stm;
@@ -229,7 +229,7 @@ GCode::_G0_G1(bool use_G0, coordf_t z,
 }
 
 std::string
-GCode::_G0_G1(bool use_G0, Pointf point, coordf_t z,
+GCode::_G0_G1(bool use_G0, const Point &point, coordf_t z,
     coordf_t e, coordf_t F, const std::string &comment)
 {
     std::stringstream gcode_stm;

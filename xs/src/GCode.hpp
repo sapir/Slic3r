@@ -71,11 +71,11 @@ class GCode {
     // TODO: these should be private, but Perl code still needs them
     std::string _G0_G1(bool is_G0,
         coordf_t e, coordf_t F, const std::string &comment);
-    std::string _G0_G1(bool is_G0, Pointf point,
+    std::string _G0_G1(bool is_G0, const Point &point,
         coordf_t e, coordf_t F, const std::string &comment);
     std::string _G0_G1(bool is_G0, coordf_t z,
         coordf_t e, coordf_t F, const std::string &comment);
-    std::string _G0_G1(bool is_G0, Pointf point, coordf_t z,
+    std::string _G0_G1(bool is_G0, const Point &point, coordf_t z,
         coordf_t e, coordf_t F, const std::string &comment);
 
 
@@ -108,7 +108,7 @@ class GCode {
     // in seconds
     double elapsed_time;
     double lifted;
-    Pointf last_pos;
+    Point last_pos;
     double last_fan_speed;
     Polyline wipe_path;
 
@@ -122,12 +122,12 @@ class GCode {
     // methods that accept a stringstream parameter assume that the
         // stream's precision is set to 3 and that the ios::fixed flag is set
 
-    void out_pointf(std::stringstream &gcode_stm, const Pointf &point);
+    void out_point(std::stringstream &gcode_stm, const Point &point);
     // only outputs comment if enabled in configuration
     void out_comment(std::stringstream &gcode_stm, const std::string &comment);
     // may or may not actually use G0
     void do_Gx_gcode(std::stringstream &gcode_stm, bool is_G0);
-    void do_Gx_point(std::stringstream &gcode_stm, const Pointf &point);
+    void do_Gx_point(std::stringstream &gcode_stm, const Point &point);
     void do_Gx_z(std::stringstream &gcode_stm, coordf_t z);
     void do_Gx_ending(std::stringstream &gcode_stm, coordf_t e, coordf_t F,
         const std::string &comment);

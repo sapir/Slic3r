@@ -26,14 +26,14 @@
     %name{_G0_G1_} std::string _G0_G1(bool is_G0,
         coordf_t e, coordf_t F, std::string comment);
 
-    %name{_G0_G1_p} std::string _G0_G1(bool is_G0, Pointf *point,
+    %name{_G0_G1_p} std::string _G0_G1(bool is_G0, Point *point,
         coordf_t e, coordf_t F, std::string comment)
         %code%{ RETVAL = THIS->_G0_G1(is_G0, *point, e, F, comment); %};
 
     %name{_G0_G1_z} std::string _G0_G1(bool is_G0, coordf_t z,
         coordf_t e, coordf_t F, std::string comment);
 
-    %name{_G0_G1_pz} std::string _G0_G1(bool is_G0, Pointf *point, coordf_t z,
+    %name{_G0_G1_pz} std::string _G0_G1(bool is_G0, Point *point, coordf_t z,
         coordf_t e, coordf_t F, std::string comment)
         %code%{ RETVAL = THIS->_G0_G1(is_G0, *point, z, e, F, comment); %};
 
