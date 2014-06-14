@@ -109,8 +109,6 @@ ExtrusionPath::gcode(Extruder* extruder, double e, double F,
     double xofs, double yofs, std::string extrusion_axis,
     std::string gcode_line_suffix) const
 {
-    dSP;
-
     std::stringstream stream;
     stream.setf(std::ios::fixed);
 
