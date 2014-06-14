@@ -64,6 +64,11 @@
     Ref<Extruder> get_extruder(int id)
         %code%{ RETVAL = THIS->extruders.at(id); %};
 
+    Ref<Extruder> extruder()
+        %code%{ RETVAL = THIS->extruder; %};
+    void _set_cur_extruder(int id)
+        %code%{ THIS->extruder = THIS->extruders.at(id); %};
+
     // Ref<GCodeMotionPlanner> external_mp;
     // Ref<GCodeMotionPlanner> layer_mp;
     // Ref<Point> last_pos;
@@ -131,17 +136,6 @@ GCode::multiple_extruders(...)
             THIS->multiple_extruders = (bool)SvIV(ST(1));
         }
         RETVAL = THIS->multiple_extruders;
-    OUTPUT:
-        RETVAL
-
-Ref<Extruder>
-GCode::extruder(...)
-    CODE:
-        if (items > 1) {
-        // TODO:
-            //THIS->extruder = (int)SvIV(ST(1));
-        }
-        RETVAL = THIS->extruder;
     OUTPUT:
         RETVAL
 

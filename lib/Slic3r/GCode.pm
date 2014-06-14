@@ -362,7 +362,7 @@ sub set_extruder {
     
     # if we are running a single-extruder setup, just set the extruder and return nothing
     if (!$self->multiple_extruders) {
-        $self->extruder($self->get_extruder($extruder_id));
+        $self->_set_cur_extruder($extruder_id);
         return "";
     }
     
@@ -399,7 +399,7 @@ sub set_extruder {
     }
     
     # set the new extruder
-    $self->extruder($self->get_extruder($extruder_id));
+    $self->_set_cur_extruder($extruder_id);
     $gcode .= sprintf "%s%d%s\n", 
         ($self->config->gcode_flavor eq 'makerware'
             ? 'M135 T'
