@@ -14,6 +14,8 @@
     GCode(PlaceholderParser *placeholder_parser, int layer_count);
     ~GCode();
 
+    void set_extruders(std::vector<int> extruder_ids, PrintConfig *print_config);
+
     std::string change_layer(Layer *layer);
     std::string move_z(coordf_t z, std::string comment);
     std::string set_acceleration(int acceleration);
@@ -58,7 +60,10 @@
         %};
 
     //std::map<PrintObject*, Point> _seam_position; // TODO: object? point?
-    // std::map<int, Extruder*> extruders;
+
+    Ref<Extruder> get_extruder(int id)
+        %code%{ RETVAL = THIS->extruders.at(id); %};
+
     // Ref<GCodeMotionPlanner> external_mp;
     // Ref<GCodeMotionPlanner> layer_mp;
     // Ref<Point> last_pos;

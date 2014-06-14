@@ -57,6 +57,8 @@ class GCode {
     GCode(PlaceholderParser *placeholder_parser, int layer_count);
     ~GCode();
 
+    void set_extruders(const std::vector<int> &extruder_ids, PrintConfig *print_config);
+
     // TODO: these methods should probably be private/protected, and should
         // accept a stringstream reference so all of the gcode can be created
         // on a single stringstream
@@ -94,8 +96,10 @@ class GCode {
     coordf_t shift_y;
     coordf_t z;
     bool z_defined;
+    // id => owned pointer to extruder
     std::map<int, Extruder*> extruders;
     bool multiple_extruders;
+    // pointer to extruder in extruders map
     Extruder *extruder;
     GCodeMotionPlanner *external_mp;
     GCodeMotionPlanner *layer_mp;
@@ -113,6 +117,7 @@ class GCode {
 
     // doesn't output GCode
     void set_z(double value);
+    void clear_extruders();
 
     // methods that accept a stringstream parameter assume that the
         // stream's precision is set to 3 and that the ios::fixed flag is set

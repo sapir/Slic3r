@@ -40,7 +40,34 @@ GCode::GCode(PlaceholderParser *placeholder_parser, int layer_count)
 
 GCode::~GCode()
 {
+    clear_extruders();
 }
+
+void
+GCode::set_extruders(const std::vector<int> &extruder_ids, PrintConfig *print_config)
+{
+    // we enable support for multiple extruder if any extruder greater than 0 is used
+    // (even if prints only uses that one) since we need to output Tx commands
+    // first extruder has index 0
+    this->multiple_extruders = false;
+
+    for (std::vector<int>::const_iterator i = extruder_ids.begin();
+        i != extruder_ids.end(); ++i)
+    {
+        int id = *i;
+        Extruder *e = new Extruder(id, print_config);
+        this->extruders[*i] = e;
+
+        if (e->wipe()) {
+            this->enable_wipe = true;
+        }
+
+        if (id > 0) {
+            this->multiple_extruders = true;
+        }
+    }
+}
+
 
 std::string
 GCode::change_layer(Layer *layer)
@@ -89,6 +116,18 @@ GCode::set_z(double value)
 {
     this->z = value;
     this->z_defined = true;
+}
+
+void
+GCode::clear_extruders()
+{
+    for (std::map<int, Extruder*>::iterator i = this->extruders.begin();
+        i != this->extruders.end(); ++i)
+    {
+        delete i->second;
+    }
+
+    this->extruders.clear();
 }
 
 void

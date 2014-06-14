@@ -39,20 +39,6 @@ sub G1 {
     return $self->_G0_G1("G1", @_);
 }
 
-sub set_extruders {
-    my ($self, $extruder_ids, $print_config) = @_;
-    
-    foreach my $i (@$extruder_ids) {
-        $self->extruders->{$i} = my $e = Slic3r::Extruder->new($i, $print_config);
-        $self->enable_wipe(1) if $e->wipe;
-    }
-    
-    # we enable support for multiple extruder if any extruder greater than 0 is used
-    # (even if prints only uses that one) since we need to output Tx commands
-    # first extruder has index 0
-    $self->multiple_extruders(max(@$extruder_ids) > 0);
-}
-
 sub set_shift {
     my ($self, @shift) = @_;
     
@@ -376,7 +362,7 @@ sub set_extruder {
     
     # if we are running a single-extruder setup, just set the extruder and return nothing
     if (!$self->multiple_extruders) {
-        $self->extruder($self->extruders->{$extruder_id});
+        $self->extruder($self->get_extruder($extruder_id));
         return "";
     }
     
@@ -413,7 +399,7 @@ sub set_extruder {
     }
     
     # set the new extruder
-    $self->extruder($self->extruders->{$extruder_id});
+    $self->extruder($self->get_extruder($extruder_id));
     $gcode .= sprintf "%s%d%s\n", 
         ($self->config->gcode_flavor eq 'makerware'
             ? 'M135 T'
