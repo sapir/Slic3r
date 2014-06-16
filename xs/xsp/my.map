@@ -1,7 +1,7 @@
 coordf_t T_NV
 
-std::vector<Points::size_type>  T_STD_VECTOR_INT
-std::vector<size_t>  T_STD_VECTOR_INT
+std::vector<Points::size_type>  T_STD_VECTOR_UINT
+std::vector<size_t>  T_STD_VECTOR_UINT
 
 t_config_option_key T_STD_STRING
 t_model_material_id T_STD_STRING
