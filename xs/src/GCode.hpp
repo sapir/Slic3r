@@ -3,10 +3,11 @@
 
 #include <myinit.h>
 #include <string>
+#include "ExPolygonCollection.hpp"
+#include "PlaceholderParser.hpp"
 #include "PrintConfig.hpp"
 #include "Point.hpp"
 #include "Polyline.hpp"
-#include "ExPolygonCollection.hpp"
 
 
 namespace Slic3r {
@@ -14,9 +15,7 @@ namespace Slic3r {
 
 class Extruder;
 class Layer;
-class PlaceholderParser;
 class PrintObject;
-class SurfaceCollection;
 
 
 // draft for a binary representation of a G-code line
@@ -54,10 +53,10 @@ class GCodeMotionPlanner {
 // GCode generator
 class GCode {
     public:
-    GCode(PlaceholderParser *placeholder_parser, int layer_count);
+    GCode(const PlaceholderParser &placeholder_parser, size_t layer_count);
     ~GCode();
 
-    void set_extruders(const std::vector<int> &extruder_ids, PrintConfig *print_config);
+    void set_extruders(const std::vector<size_t> &extruder_ids, PrintConfig *print_config);
 
     // TODO: these methods should probably be private/protected, and should
         // accept a stringstream reference so all of the gcode can be created
@@ -80,29 +79,29 @@ class GCode {
 
 
     FullPrintConfig config;
-    PlaceholderParser *placeholder_parser;
-    Points standby_points; // TODO: f? 3?
+    PlaceholderParser placeholder_parser;
+    Points standby_points;
     bool enable_loop_clipping;
     // at least one extruder has wipe enabled
     bool enable_wipe;
-    int layer_count;
+    size_t layer_count;
     // just a counter
     int _layer_index;
     Layer *layer;
     ExPolygonCollection _layer_islands;
     ExPolygonCollection _upper_layer_islands;
-    std::map<PrintObject*, Point> _seam_position; // TODO: object? point?
+    std::map<PrintObject*, Point> _seam_position;
     coordf_t shift_x;
     coordf_t shift_y;
-    coordf_t z;
+    double z;
     bool z_defined;
     // id => owned pointer to extruder
-    std::map<int, Extruder*> extruders;
+    std::map<size_t, Extruder*> extruders;
     bool multiple_extruders;
     // pointer to extruder in extruders map
     Extruder *extruder;
-    GCodeMotionPlanner *external_mp;
-    GCodeMotionPlanner *layer_mp;
+    GCodeMotionPlanner external_mp;
+    GCodeMotionPlanner layer_mp;
     bool new_object;
     bool straight_once;
     // in seconds

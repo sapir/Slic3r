@@ -7,10 +7,10 @@
 namespace Slic3r {
 
 
-GCode::GCode(PlaceholderParser *placeholder_parser, int layer_count)
+GCode::GCode(const PlaceholderParser &placeholder_parser, size_t layer_count)
 :   config(),
     placeholder_parser(placeholder_parser),
-    standby_points(),   // empty vector
+    standby_points(),       // empty vector
     enable_loop_clipping(true),
     enable_wipe(false),
     layer_count(layer_count),
@@ -26,8 +26,8 @@ GCode::GCode(PlaceholderParser *placeholder_parser, int layer_count)
     extruders(),        // empty map
     multiple_extruders(false),
     extruder(NULL),
-    external_mp(NULL),
-    layer_mp(NULL),
+    external_mp(),          // empty MP
+    layer_mp(),             // empty MP
     new_object(false),
     straight_once(true),
     elapsed_time(0),
@@ -44,17 +44,17 @@ GCode::~GCode()
 }
 
 void
-GCode::set_extruders(const std::vector<int> &extruder_ids, PrintConfig *print_config)
+GCode::set_extruders(const std::vector<size_t> &extruder_ids, PrintConfig *print_config)
 {
     // we enable support for multiple extruder if any extruder greater than 0 is used
     // (even if prints only uses that one) since we need to output Tx commands
     // first extruder has index 0
     this->multiple_extruders = false;
 
-    for (std::vector<int>::const_iterator i = extruder_ids.begin();
+    for (std::vector<size_t>::const_iterator i = extruder_ids.begin();
         i != extruder_ids.end(); ++i)
     {
-        int id = *i;
+        size_t id = *i;
         Extruder *e = new Extruder(id, print_config);
         this->extruders[*i] = e;
 
@@ -83,7 +83,7 @@ GCode::change_layer(Layer *layer)
         : layer->upper_layer->islands();
 
     if (this->config.avoid_crossing_perimeters) {
-        this->layer_mp = new GCodeMotionPlanner();
+        this->layer_mp = GCodeMotionPlanner();
             // TODO:islands => union_ex([ map @$_, @{$layer->slices} ], 1),
     }
 
@@ -121,7 +121,7 @@ GCode::set_z(double value)
 void
 GCode::clear_extruders()
 {
-    for (std::map<int, Extruder*>::iterator i = this->extruders.begin();
+    for (std::map<size_t, Extruder*>::iterator i = this->extruders.begin();
         i != this->extruders.end(); ++i)
     {
         delete i->second;

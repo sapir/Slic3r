@@ -11,10 +11,11 @@
 
 
 %name{Slic3r::GCode} class GCode {
-    GCode(PlaceholderParser *placeholder_parser, int layer_count);
+    GCode(PlaceholderParser *placeholder_parser, size_t layer_count)
+        %code%{ RETVAL = new GCode(*placeholder_parser, layer_count); %};
     ~GCode();
 
-    void set_extruders(std::vector<int> extruder_ids, PrintConfig *print_config);
+    void set_extruders(std::vector<size_t> extruder_ids, PrintConfig *print_config);
 
     std::string change_layer(Layer *layer);
     std::string move_z(coordf_t to_z, std::string comment);
@@ -40,7 +41,7 @@
     Ref<FullPrintConfig> config()
         %code%{ RETVAL = &THIS->config; %};
     Ref<PlaceholderParser> placeholder_parser()
-        %code%{ RETVAL = THIS->placeholder_parser; %};
+        %code%{ RETVAL = &THIS->placeholder_parser; %};
 
     // Ref<Points> standby_points;
 
@@ -61,11 +62,11 @@
 
     //std::map<PrintObject*, Point> _seam_position; // TODO: object? point?
 
-    Ref<Extruder> get_extruder(int id)
+    Ref<Extruder> get_extruder(size_t id)
         %code%{ RETVAL = THIS->extruders.at(id); %};
-    std::vector<int> extruder_ids()
+    std::vector<size_t> extruder_ids()
         %code%{
-            for (std::map<int, Extruder*>::iterator i = THIS->extruders.begin();
+            for (std::map<size_t, Extruder*>::iterator i = THIS->extruders.begin();
                 i != THIS->extruders.end(); ++i)
             {
                 RETVAL.push_back(i->first);
@@ -74,7 +75,7 @@
 
     Ref<Extruder> extruder()
         %code%{ RETVAL = THIS->extruder; %};
-    void _set_cur_extruder(int id)
+    void _set_cur_extruder(size_t id)
         %code%{ THIS->extruder = THIS->extruders.at(id); %};
 
     // Ref<GCodeMotionPlanner> external_mp;
@@ -111,11 +112,11 @@ GCode::enable_wipe(...)
     OUTPUT:
         RETVAL
 
-int
+size_t
 GCode::layer_count(...)
     CODE:
         if (items > 1) {
-            THIS->layer_count = (int)SvIV(ST(1));
+            THIS->layer_count = (size_t)SvIV(ST(1));
         }
         RETVAL = THIS->layer_count;
     OUTPUT:
