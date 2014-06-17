@@ -9,6 +9,9 @@ namespace Slic3r {
 
 GCodeMotionPlanner::GCodeMotionPlanner() {}
 GCodeMotionPlanner::~GCodeMotionPlanner() {}
+#ifdef SLIC3RXS
+REGISTER_CLASS(GCodeMotionPlanner, "GCode::MotionPlanner");
+#endif
 
 
 GCode::GCode(const PlaceholderParser &placeholder_parser, size_t layer_count)
