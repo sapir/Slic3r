@@ -44,7 +44,10 @@
     Ref<PlaceholderParser> placeholder_parser()
         %code%{ RETVAL = &THIS->placeholder_parser; %};
 
-    // Ref<Points> standby_points;
+    Points standby_points()
+        %code%{ RETVAL = THIS->standby_points; %};
+    void set_standby_points(Points points)
+        %code%{ THIS->standby_points = points; %};
 
     Ref<Layer> layer()
         %code%{ RETVAL = THIS->layer; %};
@@ -61,7 +64,21 @@
             RETVAL = THIS->z;
         %};
 
-    //std::map<PrintObject*, Point> _seam_position; // TODO: object? point?
+    Clone<Point> get_seam_position(PrintObject *obj)
+        %code%{
+            std::map<PrintObject*, Point>::iterator i = THIS->_seam_position.find(obj);
+            if (THIS->_seam_position.end() == i) {
+                XSRETURN_UNDEF;
+            }
+
+            RETVAL = i->second;
+        %};
+
+    void set_seam_position(PrintObject *obj, Point *p)
+        %code%{
+            THIS->_seam_position[obj] = *p;
+        %};
+
 
     Ref<Extruder> get_extruder(size_t id)
         %code%{ RETVAL = THIS->extruders.at(id); %};
@@ -79,8 +96,10 @@
     void _set_cur_extruder(size_t id)
         %code%{ THIS->extruder = THIS->extruders.at(id); %};
 
-    // Ref<GCodeMotionPlanner> external_mp;
-    // Ref<GCodeMotionPlanner> layer_mp;
+    Ref<GCodeMotionPlanner> external_mp()
+        %code%{ RETVAL = &THIS->external_mp; %};
+    Ref<GCodeMotionPlanner> layer_mp()
+        %code%{ RETVAL = &THIS->layer_mp; %};
 
     Ref<Point> last_pos()
         %code%{ RETVAL = &THIS->last_pos; %};
