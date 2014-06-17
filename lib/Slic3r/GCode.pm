@@ -353,7 +353,11 @@ sub set_extruder {
     
     # if we are running a single-extruder setup, just set the extruder and return nothing
     if (!$self->multiple_extruders) {
-        $self->_set_cur_extruder($extruder_id);
+        if (ref $extruder_id eq 'ARRAY') {
+            $self->_set_cur_extruder(@$extruder_id);
+        } else {
+            $self->_set_cur_extruder($extruder_id);
+        }
         return "";
     }
     
