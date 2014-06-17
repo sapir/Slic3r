@@ -156,10 +156,12 @@ GCode::out_comment(std::stringstream &gcode_stm, const std::string &comment)
 void
 GCode::do_Gx_gcode(std::stringstream &gcode_stm, bool is_G0)
 {
-    gcode_stm <<
+    std::string gcode =
         (is_G0 && (this->config.g0 || this->config.gcode_flavor == gcfMach3))
         ? "G0"
         : "G1";
+
+    gcode_stm << gcode;
 }
 
 void
@@ -182,7 +184,7 @@ void
 GCode::do_Gx_ending(std::stringstream &gcode_stm, coordf_t e, coordf_t F,
     const std::string &comment)
 {
-    gcode_stm << "F" << F;
+    gcode_stm << " F" << F;
 
     // output extrusion distance
     if (0 != e) {
