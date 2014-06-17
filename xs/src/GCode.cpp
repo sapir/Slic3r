@@ -7,6 +7,10 @@
 namespace Slic3r {
 
 
+GCodeMotionPlanner::GCodeMotionPlanner() {}
+GCodeMotionPlanner::~GCodeMotionPlanner() {}
+
+
 GCode::GCode(const PlaceholderParser &placeholder_parser, size_t layer_count)
 :   config(),
     placeholder_parser(placeholder_parser),
