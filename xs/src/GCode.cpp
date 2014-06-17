@@ -361,7 +361,7 @@ GCode::retract(coordf_t move_z, bool toolchange)
 
     // check that we have a positive wipe length
     // if ($wipe_path) {
-    if (wipe_path.length() > 0) {
+    if (wipe_path.points.size() > 1) {      // <-- TODO
         // subdivide the retraction
         double retracted = 0;
         Lines lines = wipe_path.lines();
