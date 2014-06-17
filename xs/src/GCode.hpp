@@ -66,6 +66,7 @@ class GCode {
     std::string move_z(coordf_t to_z, std::string comment="");
     std::string set_acceleration(int acceleration);
     std::string retract(coordf_t move_z=0, bool toolchange=false);
+    std::string reset_e();
 
     // TODO: these should be private, but Perl code still needs them
     std::string _G0_G1(bool is_G0,

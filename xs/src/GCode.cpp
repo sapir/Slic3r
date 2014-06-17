@@ -327,66 +327,141 @@ GCode::retract(coordf_t move_z, bool toolchange)
     }
 
     std::stringstream gcode_stm;
-    // TODO
-#if 0
+
+
     // wipe
-    my $wipe_path;
-    if ($self->extruder->wipe && $self->wipe_path) {
-        my @points = @{$self->wipe_path};
-        $wipe_path = Slic3r::Polyline->new($self->last_pos, @{$self->wipe_path}[1..$#{$self->wipe_path}]);
-        $wipe_path->clip_end($wipe_path->length - $self->extruder->scaled_wipe_distance($self->config->travel_speed));
+
+    // TODO: original perl code check that self->wipe_path is boolean true (i.e. defined)
+        // (also, farther down, move_z is checked to be defined rather than compared to 0)
+
+    Polyline wipe_path;
+    if (this->extruder->wipe() && !this->wipe_path.points.empty()) {
+        Points points = static_cast<Points>(this->wipe_path);
+
+        // $wipe_path = Slic3r::Polyline->new($self->last_pos, @{$self->wipe_path}[1..$#{$self->wipe_path}]);
+        wipe_path.points.push_back(this->last_pos);
+        for (size_t i = 1; i < points.size(); ++i) {
+            wipe_path.points.push_back(points[i]);
+        }
+
+        // $wipe_path->clip_end($wipe_path->length - $self->extruder->scaled_wipe_distance($self->config->travel_speed));
+        wipe_path.clip_end(wipe_path.length() - this->extruder->scaled_wipe_distance(this->config.travel_speed));
     }
 
     // prepare moves
-    my $retract = [undef, undef, -$length, $self->extruder->retract_speed_mm_min, $comment];
-    my $lift    = ($self->config->retract_lift->[0] == 0 || defined $params{move_z}) && !$self->lifted
-        ? undef
-        : [undef, $self->z + $self->config->retract_lift->[0], 0, $self->config->travel_speed*60, 'lift plate during travel'];
+
+    // my $retract = [undef, undef, -$length, $self->extruder->retract_speed_mm_min(), $comment];
+    double retract_e = -length;
+    double retract_F = this->extruder->retract_speed_mm_min();
+
+    // my $lift    = ($self->config->retract_lift->[0] == 0 || defined $params{move_z}) && !$self->lifted
+    bool need_lift = (this->config.retract_lift.get_at(0) == 0 || move_z != 0) && 0 == this->lifted;
+    //     ? undef
+    //     : [undef, $self->z + $self->config->retract_lift->[0], 0, $self->config->travel_speed*60, 'lift plate during travel'];
 
     // check that we have a positive wipe length
-    if ($wipe_path) {
+    // if ($wipe_path) {
+    if (wipe_path.length() > 0) {
         // subdivide the retraction
-        my $retracted = 0;
-        foreach my $line (@{$wipe_path->lines}) {
-            my $segment_length = $line->length;
+        double retracted = 0;
+        Lines lines = wipe_path.lines();
+        for (Lines::iterator line_it = lines.begin(); line_it != lines.end(); ++line_it) {
+            double segment_length = line_it->length();
             // reduce retraction length a bit to avoid effective retraction speed to be greater than the configured one
             // due to rounding
-            my $e = $retract->[2] * ($segment_length / $self->extruder->scaled_wipe_distance($self->config->travel_speed)) * 0.95;
-            $retracted += $e;
-            $gcode .= $self->G1($line->b, undef, $e, $self->config->travel_speed*60*0.8, $retract->[3] . ";_WIPE");
+            double e = retract_e * (segment_length / this->extruder->scaled_wipe_distance(this->config.travel_speed)) * 0.95;
+            retracted += e;
+
+            // $gcode .= $self->G1($line->b, undef, $e, $self->config->travel_speed*60*0.8, $retract->[3] . ";_WIPE");
+            std::stringstream comment_stm;
+            comment_stm << retract_F << ";_WIPE";
+            gcode_stm << this->_G0_G1(false, line_it->b, e, this->config.travel_speed*60*0.8, comment_stm.str());
         }
-        if ($retracted > $retract->[2]) {
+
+        // if ($retracted > $retract->[2]) {
+        if (retracted > retract_e) {
             // if we retracted less than we had to, retract the remainder
             // TODO: add regression test
-            $gcode .= $self->G1(undef, undef, $retract->[2] - $retracted, $self->extruder->retract_speed_mm_min, $comment);
+            // $gcode .= $self->G1(undef, undef, $retract->[2] - $retracted, $self->extruder->retract_speed_mm_min, $comment);
+            gcode_stm << this->_G0_G1(false, retract_e - retracted, this->extruder->retract_speed_mm_min(), comment);
         }
-    } elsif ($self->config->use_firmware_retraction) {
-        $gcode .= "G10 ; retract\n";
+    } else if (this->config.use_firmware_retraction) {
+        gcode_stm << "G10 ; retract\n";
     } else {
-        $gcode .= $self->G1(@$retract);
+        // $gcode .= $self->G1(@$retract);
+        gcode_stm << this->_G0_G1(false, retract_e, retract_F, comment);
     }
-    if (!$self->lifted) {
-        if (defined $params{move_z} && $self->config->retract_lift->[0] > 0) {
-            my $travel = [undef, $params{move_z} + $self->config->retract_lift->[0], 0, $self->config->travel_speed*60, 'move to next layer (' . $self->layer->id() . ') and lift'];
-            $gcode .= $self->G0(@$travel);
-            $self->lifted($self->config->retract_lift->[0]);
-        } elsif ($lift) {
-            $gcode .= $self->G1(@$lift);
+
+    // if (!$self->lifted) {
+    if (0 == this->lifted) {
+        // if (defined $params{move_z} && $self->config->retract_lift->[0] > 0) {
+        if (0 != move_z && this->config.retract_lift.get_at(0) > 0) {
+            // my $travel = [undef, $params{move_z} + $self->config->retract_lift->[0], 0, $self->config->travel_speed*60, 'move to next layer (' . $self->layer->id() . ') and lift'];
+            // $gcode .= $self->G0(@$travel);
+            std::stringstream comment_stm;
+            comment_stm << "move to next layer (" << this->layer->id() << ") and lift";
+            gcode_stm << this->_G0_G1(true, move_z + this->config.retract_lift.get_at(0),
+                0, this->config.travel_speed * 60, comment_stm.str());
+
+            // $self->lifted($self->config->retract_lift->[0]);
+            this->lifted = this->config.retract_lift.get_at(0);
+        // } elsif ($lift) {
+        } else if (need_lift) {
+            // $gcode .= $self->G1(@$lift);
+            // $lift definition was:
+            //     : [undef, $self->z + $self->config->retract_lift->[0], 0, $self->config->travel_speed*60, 'lift plate during travel'];
+            gcode_stm << this->_G0_G1(false, this->z + this->config.retract_lift.get_at(0),
+                0, this->config.travel_speed*60, "lift plate during travel");
         }
     }
-    $self->extruder->set_retracted($self->extruder->retracted + $length);
-    $self->extruder->set_restart_extra($restart_extra);
-    $self->lifted($self->config->retract_lift->[0]) if $lift;
+
+    this->extruder->retracted += length;
+    this->extruder->restart_extra = restart_extra;
+    // $self->lifted($self->config->retract_lift->[0]) if $lift;
+    if (need_lift) {
+        this->lifted = this->config.retract_lift.get_at(0);
+    }
 
     // reset extrusion distance during retracts
     // this makes sure we leave sufficient precision in the firmware
-    $gcode .= $self->reset_e;
+    gcode_stm << this->reset_e();
 
-    $gcode .= "M103 ; extruder off\n" if $self->config->gcode_flavor eq 'makerware';
-#endif
+    if (this->config.gcode_flavor == gcfMakerWare) {
+        gcode_stm << "M103 ; extruder off\n";
+    }
 
     return gcode_stm.str();
 }
+
+std::string
+GCode::reset_e()
+{
+    // return "" if $self->config->gcode_flavor =~ /^(?:mach3|makerware|sailfish)$/;
+    if (this->config.gcode_flavor == gcfMach3
+        || this->config.gcode_flavor == gcfMakerWare
+        || this->config.gcode_flavor == gcfSailfish)
+    {
+        return "";
+    }
+
+    // $self->extruder->set_E(0) if $self->extruder;
+    if (NULL != this->extruder) {
+        this->extruder->E = 0;
+    }
+
+    // return sprintf "G92 %s0%s\n", $self->config->get_extrusion_axis, ($self->config->gcode_comments ? ' ; reset extrusion distance' : '')
+    //     if $self->config->get_extrusion_axis && !$self->config->use_relative_e_distances;
+    std::stringstream gcode_stm;
+
+    if (this->config.get_extrusion_axis() != "" && !this->config.use_relative_e_distances) {
+        gcode_stm << "G92 " << this->config.get_extrusion_axis() << "0";
+        this->out_comment(gcode_stm, "reset extrusion distance");
+        gcode_stm << "\n";
+    }
+
+    return gcode_stm.str();
+}
+
 
 
 #ifdef SLIC3RXS

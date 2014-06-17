@@ -21,6 +21,7 @@
     std::string move_z(coordf_t to_z, std::string comment);
     std::string set_acceleration(int acceleration);
     std::string retract(coordf_t move_z=0, bool toolchange=false);
+    std::string reset_e();
 
     // workaround for method overloading
 
