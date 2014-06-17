@@ -120,6 +120,18 @@ Extruder::wipe() const
     return this->config->wipe.get_at(this->id);
 }
 
+int
+Extruder::retract_speed_mm_min() const {
+    return this->retract_speed() * 60;
+}
+
+double
+Extruder::scaled_wipe_distance(double travel_speed) const {
+    // reduce feedrate a bit; travel speed is often too high to move on existing material
+    // too fast = ripping of existing material; too slow = short wipe path, thus more blob
+    return scale_(this->retract_length() / this->retract_speed() * travel_speed * 0.8);
+}
+
 
 #ifdef SLIC3RXS
 REGISTER_CLASS(Extruder, "Extruder");

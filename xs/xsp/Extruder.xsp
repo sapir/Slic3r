@@ -46,4 +46,7 @@
     double retract_length_toolchange() const;
     double retract_restart_extra_toolchange() const;
     bool wipe() const;
+
+    int retract_speed_mm_min() const;
+    double scaled_wipe_distance(double travel_speed) const;
 };

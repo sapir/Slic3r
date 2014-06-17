@@ -31,7 +31,15 @@ class Extruder
     double retract_length_toolchange() const;
     double retract_restart_extra_toolchange() const;
     bool wipe() const;
-    
+
+
+    int retract_speed_mm_min() const;
+
+    // how far do we move in XY at travel_speed for the time needed to consume
+    // retract_length at retract_speed?
+    double scaled_wipe_distance(double travel_speed) const;
+
+
     int id;
     double E;
     double absolute_E;
